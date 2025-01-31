@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos Disponibles</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h2><a href="dashboard.html">Admin Dashboard</a></h2>
+            <ul>
+                <li><a href="registro_ventas.html">Registro Ventas</a></li>
+                <li><a href="seguimiento_pedidos.html">Panel de Pedidos</a></li>
+                <li><a href="settings.html">Estado de la App</a></li>
+                <li><a href="productos-disponibles.html">Productos Disponibles</a></li>
+                <li><a href="telefonos-db.html">Puntos Acumulados</a></li>
+                <li><a href="promociones-activas.html">Promociones Activas</a></li>
+                <header class="dashboard-header">
+                    <button class="logout-button" onclick="cerrarSesion()">Salir de la sesión</button>
+                </header>
+            </ul>
+        </aside>
+
+        <!-- Contenido principal -->
+        <div class="main-content-1">
+            <h1>Productos Disponibles</h1>
+
+            <div class="table-header">
+                <input type="text" id="search" placeholder="Buscar productos...">
+                <button onclick="buscarProducto()">Buscar</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Precio</th>
+                    </tr>
+                </thead>
+                <tbody id="productos-tabla">
+                    <!-- Los productos se cargarán aquí -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const url = 'https://lverapizza.github.io/App/productos-ventas.html';
+
+        fetch(url)
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const productos = doc.querySelectorAll('.product-card, .product-card-2'); // Seleccionamos ambos tipos de tarjetas de producto
+                const tabla = document.getElementById('productos-tabla');
+                
+                // Guardamos los productos en un arreglo
+                let productosData = [];
+
+                productos.forEach(producto => {
+                    const nombre = producto.querySelector('h3').textContent.trim();
+                    const descripcion = producto.querySelector('p').textContent.trim();
+                    const precio = producto.querySelector('span').textContent.trim();
+
+                    // Guardamos cada producto en el arreglo
+                    productosData.push({
+                        nombre,
+                        descripcion,
+                        precio
+                    });
+
+                    // Agregamos la fila a la tabla
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td>${nombre}</td>
+                        <td>${descripcion}</td>
+                        <td>${precio}</td>
+                    `;
+                    tabla.appendChild(fila);
+                });
+
+                // Guardamos los productos en el objeto global para usarlos en la búsqueda
+                window.productosData = productosData;
+            })
+            .catch(error => console.error('Error al cargar los productos:', error));
+
+        // Función de búsqueda del producto
+        function buscarProducto() {
+            const inputNombre = document.getElementById("search").value.trim().toLowerCase();
+            const tabla = document.getElementById("productos-tabla");
+            const filas = tabla.querySelectorAll("tr");
+            let encontrado = false;
+
+            // Recorrer las filas de la tabla y ocultarlas si no coinciden con la búsqueda
+            filas.forEach(fila => {
+                const nombreProducto = fila.querySelector("td:nth-child(1)").textContent.trim().toLowerCase(); // Obtenemos el nombre en la primera columna
+
+                if (nombreProducto.includes(inputNombre)) {
+                    fila.style.display = ""; // Mostrar la fila si el nombre coincide
+                    encontrado = true;
+                } else {
+                    fila.style.display = "none"; // Ocultar las filas que no coincidan
+                }
+            });
+
+            if (!encontrado) {
+                alert(`Producto con nombre "${inputNombre}" no encontrado.`);
+            }
+        }
+
+        // Función para cerrar sesión
+        function cerrarSesion() {
+            // Aquí puedes limpiar los datos de la sesión
+            alert("Sesión cerrada correctamente.");
+            // Redirigir a la página de inicio de sesión
+            window.location.href = "index.html"; // Cambia a tu página de inicio de sesión
+        }
+    </script>
+</body>
+
+
+</html>

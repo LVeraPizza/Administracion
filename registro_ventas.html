@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro Ventas</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(12px);
+            transition: all 0.3s ease-in-out;
+            border-radius: 15px;
+        }
+    
+        h1 {
+            font-size: 28px;
+            color: black;
+            margin-bottom: 20px;
+            text-align: center; /* Centra el texto */
+            margin-top: 40px;
+        }
+    
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            text-align: center; /* Centra el contenido dentro del formulario */
+        }
+    
+        label,
+        select,
+        input,
+        button {
+            display: block;
+            width: 80%; /* Menos ancho */
+            margin: 15px auto; /* Centrado horizontal */
+            text-align: center; /* Centra el texto dentro de cada campo */
+            font-size: 20px;
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif
+        }
+    
+        input,
+        select {
+            padding: 6px; /* Menor padding */
+            font-size: 14px; /* Tamaño de texto más pequeño */
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: center; /* Centra el contenido del input/select */
+        }
+    
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 15px; /* Menor padding */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px; /* Tamaño de texto más pequeño */
+            width: 480px; /* Botón con tamaño ajustado */
+        }
+    
+        button:hover {
+            background-color: #218838;
+        }
+    
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            text-align: center; /* Centra el contenido de la tabla */
+        }
+    
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+    
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+    
+        .finalizar-dia-btn {
+            background-color: #dc3545;
+            /* Rojo */
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 200px;
+            height: 60px;
+        }
+    
+        .finalizar-dia-btn:hover {
+            background-color: #c82333;
+            /* Rojo más oscuro en hover */
+        }
+    </style>
+    
+</head>
+
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <h2><a href="dashboard.html">Admin Dashboard</a></h2>
+            <ul>
+                <li><a href="registro_ventas.html">Registro Ventas</a></li>
+                <li><a href="seguimiento_pedidos.html">Panel de Pedidos</a></li>
+                <li><a href="settings.html">Estado de la App</a></li>
+                <li><a href="productos-disponibles.html">Productos Disponibles</a></li>
+                <li><a href="telefonos-db.html">Puntos Acumulados</a></li>
+                <li><a href="promociones-activas.html">Promociones Activas</a></li>
+                <header class="dashboard-header">
+                    <button class="logout-button" onclick="cerrarSesion()">Salir de la sesión</button>
+                </header>
+            </ul>
+        </aside>
+
+        <div class="main-content-1">
+            <h1>Realizar Venta</h1>
+            <form id="ventaForm">
+                <label>Dirección: <input type="text" id="direccion" required></label>
+                <label>Productos:</label>
+                <div id="productosContainer"></div>
+                <button type="button" onclick="agregarProducto()">Agregar otro producto</button>
+                <label>Forma de Pago: <select id="formaPago">
+                        <option>Efectivo</option>
+                        <option>Tarjeta</option>
+                        <option>Transferencia</option>
+                    </select></label>
+                <label>Forma de Envío: <select id="formaEnvio">
+                        <option>Retiro en Local</option>
+                        <option>Envío a domicilio</option>
+                    </select></label>
+                <label>Nota: <input type="text" id="nota"></label>
+                <label>Total: <input type="number" id="totalVenta" placeholder="Total" min="0" step="0.01"
+                        readonly></label>
+                <button type="button" onclick="agregarVenta()">Agregar</button>
+            </form>
+            <button class="finalizar-dia-btn" onclick="finalizarDia()">Finalizar Día</button>
+            <h1>Ventas Registradas</h1>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Dirección</th>
+                        <th>Productos</th>
+                        <th>Forma de Pago</th>
+                        <th>Forma de Envío</th>
+                        <th>Total</th>
+                        <th>Nota</th>
+                    </tr>
+                </thead>
+                <tbody id="ventasTabla"></tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <script>
+        function agregarProducto() {
+            let container = document.getElementById("productosContainer");
+            let div = document.createElement("div");
+            div.classList.add("producto-item");
+            div.innerHTML = `
+                <select class="producto" onchange="calcularTotal()">
+                    <option value="8000">Pizza Napolitana Margherita - $8000</option>
+                    <option value="10000">Pizza Napolitana 4 Formaggi - $10000</option>
+                    <option value="9000">Pizza Napolitana Pepperoni - $9000</option>
+                    <option value="9000">Pizza Napolitana Rucula y Jamon Crudo - $9000</option>
+                    <option value="9000">Pizza Napolitana Capresse - $9000</option>
+                    <option value="9000">Pizza Napolitana Mortadela con Pistacho - $9000</option>
+                    <option value="9000">Pizza Romana Capresse - $9000</option>
+                    <option value="11000">Pizza Romana 4 Formaggi - $11000</option>
+                    <option value="10000">Pizza Romana Pepperoni - $10000</option>
+                    <option value="10000">Pizza Romana Rucula y Jamon Crudo - $10000</option>
+                    <option value="10000">Pizza Romana Margherita - $10000</option>
+                    <option value="8000">Focaccia Mortadela - $8000</option>
+                    <option value="8000">Focaccia Rucula y Jamon Crudo - $8000</option>
+                    <option value="8000">Panini Rucula y Jamon crudo - $8000</option>
+                    <option value="7000">Calzone Clasico - $7000</option>
+                    <option value="16000">Promo 1">Promo 1 - $16000</option>
+                    <option value="16000">Promo 2">Promo 2 - $16000</option>
+                    <option value="14000">Promo 3">Promo 3 - $14000</option>
+                </select>
+                <input type="number" class="cantidad" placeholder="Cantidad" min="1" value="1" oninput="calcularTotal()">
+            `;
+            container.appendChild(div);
+            calcularTotal();
+        }
+
+        function calcularTotal() {
+            let total = 0;
+            document.querySelectorAll(".producto-item").forEach(item => {
+                let precio = parseFloat(item.querySelector(".producto").value);
+                let cantidad = parseInt(item.querySelector(".cantidad").value);
+                total += precio * cantidad;
+            });
+
+            // Verificar si la forma de envío es "Retiro en tienda"
+            let formaEnvio = document.getElementById("formaEnvio").value;
+            if (formaEnvio === "Retiro en Local") {
+                total += 1300; // Agregar $1300 al total si se selecciona "Retiro en tienda"
+            }
+
+            document.getElementById("totalVenta").value = total.toFixed(2);
+        }
+
+        // Llamar a calcularTotal cuando la forma de envío cambie
+        document.getElementById("formaEnvio").addEventListener("change", calcularTotal);
+
+        function agregarVenta() {
+            let direccion = document.getElementById("direccion").value;
+            let productos = Array.from(document.querySelectorAll(".producto-item"))
+                .map(item => {
+                    let producto = item.querySelector(".producto").selectedOptions[0].text;
+                    let cantidad = item.querySelector(".cantidad").value;
+                    return `${producto} (x${cantidad})`;
+                }).join("<br>");
+            let formaPago = document.getElementById("formaPago").value;
+            let formaEnvio = document.getElementById("formaEnvio").value;
+            let nota = document.getElementById("nota").value;
+            let total = document.getElementById("totalVenta").value;
+
+            let tabla = document.getElementById("ventasTabla");
+            let fila = tabla.insertRow();
+            fila.insertCell(0).innerText = direccion;
+            fila.insertCell(1).innerHTML = productos;
+            fila.insertCell(2).innerText = formaPago;
+            fila.insertCell(3).innerText = formaEnvio;
+            fila.insertCell(4).innerText = `$${total}`;
+            fila.insertCell(5).innerText = nota;
+
+            document.getElementById("ventaForm").reset();
+            document.getElementById("productosContainer").innerHTML = "";
+            document.getElementById("totalVenta").value = "0.00";
+        }
+
+        function finalizarDia() {
+            const { jsPDF } = window.jspdf;
+            let doc = new jsPDF();
+            doc.text("Ventas Registradas", 10, 10);
+            let rows = [];
+            document.querySelectorAll("#ventasTabla tr").forEach(tr => {
+                let rowData = [];
+                tr.querySelectorAll("td").forEach(td => rowData.push(td.innerText));
+                rows.push(rowData);
+            });
+            doc.autoTable({ head: [["Dirección", "Productos", "Pago", "Envío", "Total", "Nota"]], body: rows });
+            doc.save("ventas_diarias.pdf");
+            document.getElementById("ventasTabla").innerHTML = "";
+        }
+    </script>
+</body>
+
+</html>

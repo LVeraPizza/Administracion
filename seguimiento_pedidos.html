@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedidos</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            /* Ocupa toda la altura de la ventana */
+            padding: 20px;
+            text-align: center;
+        }
+
+        #order-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            /* Espaciado entre los pedidos */
+            width: 100%;
+            /* Ancho máximo del listado */
+            background-color: #f8f9fa;
+            /* Fondo claro */
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            /* Sombra suave */
+            overflow-y: auto;
+            /* Scroll si hay muchos pedidos */
+            height: auto;
+            max-height: 60vh;
+            /* Limita la altura máxima */
+        }
+
+        .order-item {
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #ffffff;
+            /* Fondo blanco */
+            border: 1px solid #ddd;
+            /* Borde gris claro */
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            /* Sombra ligera */
+        }
+
+        .order-item p {
+            margin: 0;
+            /* Sin márgenes en los párrafos */
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            color: #333;
+            /* Texto oscuro */
+            margin-bottom: 10px;
+        }
+
+        .order-item select {
+            padding: 5px;
+            font-size: 14px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #f4f4f4;
+            cursor: pointer;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h2><a href="dashboard.html">Admin Dashboard</a></h2>
+            <ul>
+                <li><a href="registro_ventas.html">Registro Ventas</a></li>
+                <li><a href="seguimiento_pedidos.html">Panel de Pedidos</a></li>
+                <li><a href="settings.html">Estado de la App</a></li>
+                <li><a href="productos-disponibles.html">Productos Disponibles</a></li>
+                <li><a href="telefonos-db.html">Puntos Acumulados</a></li>
+                <li><a href="promociones-activas.html">Promociones Activas</a></li>
+                <header class="dashboard-header">
+                    <button class="logout-button" onclick="cerrarSesion()">Salir de la sesión</button>
+                </header>
+            </ul>
+        </aside>
+        <div class="main-content">
+            <h2>Administración de Pedidos</h2>
+            <div id="order-list"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-app.js";
+        import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-database.js";
+
+        // Tu configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCzMNKimcw1kaaJlMdTKj7RAdlsHyaImBk",
+            authDomain: "vera-pizza-app.firebaseapp.com",
+            databaseURL: "https://vera-pizza-app-default-rtdb.firebaseio.com/",
+            projectId: "vera-pizza-app",
+            storageBucket: "vera-pizza-app.appspot.com",
+            messagingSenderId: "783988757356",
+            appId: "1:783988757356:web:c66d3f2571aff0f125d949",
+            measurementId: "G-FNLSPHKXFW"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const orderListDiv = document.getElementById('order-list');
+
+        // Función para mostrar los pedidos
+        function displayOrders() {
+            const ordersRef = ref(database, 'pedidos');
+            get(ordersRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const ordersData = snapshot.val();
+                    orderListDiv.innerHTML = ''; // Limpiar la lista de pedidos para evitar duplicados
+
+                    // Invertir el orden de las claves
+                    Object.keys(ordersData)
+                        .reverse() // Invertir el orden para mostrar los pedidos más recientes primero
+                        .forEach((orderId) => {
+                            const order = ordersData[orderId];
+                            const orderDiv = document.createElement('div');
+                            orderDiv.classList.add('order-item');
+                            orderDiv.setAttribute('data-order-id', orderId); // Asignar el data-order-id
+                            orderDiv.innerHTML = `
+                    <div>
+                        <p><strong>Pedido ID:</strong> ${orderId}</p>
+                        <p><strong>Nombre:</strong> ${order.Nombre}</span></p>
+                        <p><strong>Direccion:</strong> ${order.Direccion}</span></p>
+                        <p><strong>Fecha:</strong> ${order.Fecha}</p>
+                        <p><strong>Total $:</strong> ${order.Total}</span></p>
+                        <p><strong>Estado:</strong> <span class="status"> ${order.Estado}</span></p>
+                    </div>
+                    <div>
+                        <select onchange="updateStatus('${orderId}', this.value)" ${order.status === "Entregado" ? "disabled" : ""}>
+                            <option value="En Proceso" ${order.status === "En Proceso" ? "selected" : ""}>En Proceso</option>
+                            <option value="Procesando" ${order.status === "Procesando" ? "selected" : ""}>Procesando</option>
+                            <option value="En Camino" ${order.status === "En Camino" ? "selected" : ""}>En Camino</option>
+                            <option value="Entregado" ${order.status === "Entregado" ? "selected" : ""}>Entregado</option>
+                        </select>
+                    </div>
+                `;
+                            if (order.status === "Entregado") {
+                                const select = orderDiv.querySelector('select');
+                                if (select) {
+                                    select.disabled = true;
+                                    select.style.backgroundColor = '#4CAF50'; // Cambiar el color de fondo a verde
+                                }
+                            }
+                            orderListDiv.appendChild(orderDiv);
+                        });
+                } else {
+                    orderListDiv.innerHTML = `<p>No hay pedidos.</p>`;
+                }
+            }).catch((error) => {
+                console.error("Error al obtener los pedidos:", error);
+            });
+
+        }
+
+        // Función para actualizar el estado del pedido
+        window.updateStatus = function (orderId, newStatus) {
+            const orderRef = ref(database, 'pedidos/' + orderId);
+            update(orderRef, { status: newStatus }).then(() => {
+                alert("Estado actualizado.");
+                // Obtener el div del pedido con el data-order-id correspondiente
+                const orderDiv = document.querySelector(`[data-order-id="${orderId}"]`);
+                if (orderDiv) {
+                    // Actualizar el estado en el contenedor
+                    const statusElement = orderDiv.querySelector('.status');
+                    if (statusElement) {
+                        statusElement.textContent = newStatus; // Cambiar el texto del estado
+                    }
+
+                    // Si el estado es "Entregado", deshabilitar el select y cambiar el color
+                    const select = orderDiv.querySelector('select');
+                    if (newStatus === "Entregado") {
+                        select.disabled = true;
+                        select.style.backgroundColor = '#4CAF50'; // Cambiar el color de fondo a verde
+                    }
+                }
+            }).catch((error) => {
+                console.error("Error al actualizar el estado:", error);
+            });
+        };
+
+        // Llamada inicial para mostrar los pedidos
+        displayOrders();
+
+        // Cambiar el estado del pedido (simulado aquí)
+        function cambiarEstadoPedido(status) {
+            // Suponiendo que tenemos la notificación configurada con un Service Worker
+            if (Notification.permission === 'granted') {
+                // Aquí se podría obtener la información del cliente, pero para este ejemplo solo se mostrará el status
+                const mensaje = `Tu pedido está ${status}`;
+                mostrarNotificacion(mensaje);
+            }
+        }
+
+        // Función para mostrar la notificación
+        function mostrarNotificacion(mensaje) {
+            if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+                navigator.serviceWorker.ready.then(function (registration) {
+                    registration.showNotification('Actualización del Pedido', {
+                        body: mensaje,
+                        icon: 'img/logo_vp.png',
+                        badge: 'img/logo_vp.png'
+                    });
+                });
+            }
+        }
+
+        // Llamada al cambiar el estado del pedido
+        cambiarEstadoPedido('en preparación');
+
+    </script>
+    <script>
+        function cerrarSesion() {
+            // Aquí puedes limpiar los datos de la sesión
+            alert("Sesión cerrada correctamente.");
+            // Redirigir a la página de inicio de sesión
+            window.location.href = "index.html"; // Cambia a tu página de inicio de sesión
+        }
+    </script>
+</body>
+
+</html>
