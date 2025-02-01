@@ -113,6 +113,11 @@
             background-color: #c82333;
             /* Rojo más oscuro en hover */
         }
+        .reloj {
+            font-size: 30px;
+            font-family: 'Arial', sans-serif;
+            color: #333;
+        }
     </style>
     
 </head>
@@ -136,7 +141,9 @@
 
         <div class="main-content-1">
             <h1>Realizar Venta</h1>
+            
             <form id="ventaForm">
+                <div class="reloj" id="reloj"></div>
                 <label>Dirección: <input type="text" id="direccion" required></label>
                 <label>Productos:</label>
                 <div id="productosContainer"></div>
@@ -166,13 +173,13 @@
                         <th>Forma de Envío</th>
                         <th>Total</th>
                         <th>Nota</th>
+                        <th>Eliminar</th> <!-- Nueva columna de eliminar -->
                     </tr>
                 </thead>
                 <tbody id="ventasTabla"></tbody>
             </table>
         </div>
     </div>
-
 
     <script>
         function agregarProducto() {
@@ -196,16 +203,16 @@
                     <option value="8000">Focaccia Rucula y Jamon Crudo - $8000</option>
                     <option value="8000">Panini Rucula y Jamon crudo - $8000</option>
                     <option value="7000">Calzone Clasico - $7000</option>
-                    <option value="16000">Promo 1">Promo 1 - $16000</option>
-                    <option value="16000">Promo 2">Promo 2 - $16000</option>
-                    <option value="14000">Promo 3">Promo 3 - $14000</option>
+                    <option value="16000">Promo 1 - $16000</option>
+                    <option value="16000">Promo 2 - $16000</option>
+                    <option value="14000">Promo 3 - $14000</option>
                 </select>
                 <input type="number" class="cantidad" placeholder="Cantidad" min="1" value="1" oninput="calcularTotal()">
             `;
             container.appendChild(div);
             calcularTotal();
         }
-
+    
         function calcularTotal() {
             let total = 0;
             document.querySelectorAll(".producto-item").forEach(item => {
@@ -213,61 +220,114 @@
                 let cantidad = parseInt(item.querySelector(".cantidad").value);
                 total += precio * cantidad;
             });
-
+    
             // Verificar si la forma de envío es "Retiro en tienda"
             let formaEnvio = document.getElementById("formaEnvio").value;
             if (formaEnvio === "Retiro en Local") {
                 total += 1300; // Agregar $1300 al total si se selecciona "Retiro en tienda"
             }
-
+    
             document.getElementById("totalVenta").value = total.toFixed(2);
         }
-
+    
         // Llamar a calcularTotal cuando la forma de envío cambie
         document.getElementById("formaEnvio").addEventListener("change", calcularTotal);
-
+    
         function agregarVenta() {
             let direccion = document.getElementById("direccion").value;
             let productos = Array.from(document.querySelectorAll(".producto-item"))
                 .map(item => {
                     let producto = item.querySelector(".producto").selectedOptions[0].text;
                     let cantidad = item.querySelector(".cantidad").value;
-                    return `${producto} (x${cantidad})`;
-                }).join("<br>");
+                    return `${producto} x${cantidad}`;
+                }).join(", ");
             let formaPago = document.getElementById("formaPago").value;
             let formaEnvio = document.getElementById("formaEnvio").value;
-            let nota = document.getElementById("nota").value;
             let total = document.getElementById("totalVenta").value;
-
-            let tabla = document.getElementById("ventasTabla");
-            let fila = tabla.insertRow();
-            fila.insertCell(0).innerText = direccion;
-            fila.insertCell(1).innerHTML = productos;
-            fila.insertCell(2).innerText = formaPago;
-            fila.insertCell(3).innerText = formaEnvio;
-            fila.insertCell(4).innerText = `$${total}`;
-            fila.insertCell(5).innerText = nota;
-
+            let nota = document.getElementById("nota").value;
+    
+            let venta = {
+                direccion,
+                productos,
+                formaPago,
+                formaEnvio,
+                total,
+                nota
+            };
+    
+            let ventas = JSON.parse(localStorage.getItem("ventas")) || [];
+            ventas.push(venta);
+            localStorage.setItem("ventas", JSON.stringify(ventas));
+            mostrarVentas();
             document.getElementById("ventaForm").reset();
-            document.getElementById("productosContainer").innerHTML = "";
-            document.getElementById("totalVenta").value = "0.00";
         }
-
-        function finalizarDia() {
-            const { jsPDF } = window.jspdf;
-            let doc = new jsPDF();
-            doc.text("Ventas Registradas", 10, 10);
-            let rows = [];
-            document.querySelectorAll("#ventasTabla tr").forEach(tr => {
-                let rowData = [];
-                tr.querySelectorAll("td").forEach(td => rowData.push(td.innerText));
-                rows.push(rowData);
+    
+        function mostrarVentas() {
+            let ventas = JSON.parse(localStorage.getItem("ventas")) || [];
+            let tabla = document.getElementById("ventasTabla");
+            tabla.innerHTML = "";
+            ventas.forEach((venta, index) => {
+                let row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${venta.direccion}</td>
+                    <td>${venta.productos}</td>
+                    <td>${venta.formaPago}</td>
+                    <td>${venta.formaEnvio}</td>
+                    <td>${venta.total}</td>
+                    <td>${venta.nota}</td>
+                    <td><button class="finalizar-dia-btn" onclick="eliminarVenta(${index})">Eliminar</button></td>
+                `;
+                tabla.appendChild(row);
             });
-            doc.autoTable({ head: [["Dirección", "Productos", "Pago", "Envío", "Total", "Nota"]], body: rows });
-            doc.save("ventas_diarias.pdf");
-            document.getElementById("ventasTabla").innerHTML = "";
+        }
+    
+        function eliminarVenta(index) {
+            let ventas = JSON.parse(localStorage.getItem("ventas")) || [];
+            ventas.splice(index, 1);
+            localStorage.setItem("ventas", JSON.stringify(ventas));
+            mostrarVentas();
+        }
+    
+        function finalizarDia() {
+            localStorage.removeItem("ventas");
+            mostrarVentas();
+        }
+    
+        window.onload = mostrarVentas;
+    
+        function actualizarReloj() {
+            const now = new Date();
+            const hora = now.getHours().toString().padStart(2, '0');
+            const minutos = now.getMinutes().toString().padStart(2, '0');
+            const segundos = now.getSeconds().toString().padStart(2, '0');
+            const fecha = now.toLocaleDateString();
+    
+            document.getElementById('reloj').textContent = `${fecha} - ${hora}:${minutos}:${segundos}`;
+        }
+    
+        // Actualiza el reloj cada segundo
+        setInterval(actualizarReloj, 1000);
+    
+        // Inicializa el reloj al cargar la página
+        actualizarReloj();
+    
+        function guardarPDF() {
+            // Crea un objeto PDF con la tabla y el reloj
+            const doc = new jsPDF();
+            
+            // Obtener el reloj
+            const reloj = document.getElementById('reloj').textContent;
+            doc.text('Fecha y Hora: ' + reloj, 10, 10);
+            
+            // Obtener la tabla
+            const tabla = document.getElementById('ventasTabla');
+            doc.autoTable({ html: '#ventasTabla', startY: 20 });
+    
+            // Guardar el PDF con el nombre 'ventas.pdf'
+            doc.save('ventas.pdf');
         }
     </script>
+    
 </body>
 
 </html>
