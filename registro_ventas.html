@@ -22,81 +22,93 @@
             transition: all 0.3s ease-in-out;
             border-radius: 15px;
         }
-    
+
         h1 {
             font-size: 28px;
             color: black;
             margin-bottom: 20px;
-            text-align: center; /* Centra el texto */
+            text-align: center;
+            /* Centra el texto */
             margin-top: 40px;
         }
-    
+
         form {
             background: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
             width: 100%;
-            text-align: center; /* Centra el contenido dentro del formulario */
+            text-align: center;
+            /* Centra el contenido dentro del formulario */
         }
-    
+
         label,
         select,
         input,
         button {
             display: block;
-            width: 80%; /* Menos ancho */
-            margin: 15px auto; /* Centrado horizontal */
-            text-align: center; /* Centra el texto dentro de cada campo */
+            width: 80%;
+            /* Menos ancho */
+            margin: 15px auto;
+            /* Centrado horizontal */
+            text-align: center;
+            /* Centra el texto dentro de cada campo */
             font-size: 20px;
             font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif
         }
-    
+
         input,
         select {
-            padding: 6px; /* Menor padding */
-            font-size: 14px; /* Tamaño de texto más pequeño */
+            padding: 6px;
+            /* Menor padding */
+            font-size: 14px;
+            /* Tamaño de texto más pequeño */
             border: 1px solid #ccc;
             border-radius: 5px;
-            text-align: center; /* Centra el contenido del input/select */
+            text-align: center;
+            /* Centra el contenido del input/select */
         }
-    
+
         button {
             background-color: #28a745;
             color: white;
-            padding: 15px; /* Menor padding */
+            padding: 15px;
+            /* Menor padding */
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 14px; /* Tamaño de texto más pequeño */
-            width: 480px; /* Botón con tamaño ajustado */
+            font-size: 14px;
+            /* Tamaño de texto más pequeño */
+            width: 480px;
+            /* Botón con tamaño ajustado */
         }
-    
+
         button:hover {
             background-color: #218838;
         }
-    
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
             background: white;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            text-align: center; /* Centra el contenido de la tabla */
+            text-align: center;
+            /* Centra el contenido de la tabla */
         }
-    
+
         th,
         td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
         }
-    
+
         th {
             background-color: #007bff;
             color: white;
         }
-    
+
         .finalizar-dia-btn {
             background-color: #dc3545;
             /* Rojo */
@@ -108,18 +120,19 @@
             width: 200px;
             height: 60px;
         }
-    
+
         .finalizar-dia-btn:hover {
             background-color: #c82333;
             /* Rojo más oscuro en hover */
         }
+
         .reloj {
             font-size: 30px;
             font-family: 'Arial', sans-serif;
             color: #333;
         }
     </style>
-    
+
 </head>
 
 <body>
@@ -141,7 +154,7 @@
 
         <div class="main-content-1">
             <h1>Realizar Venta</h1>
-            
+
             <form id="ventaForm">
                 <div class="reloj" id="reloj"></div>
                 <label>Dirección: <input type="text" id="direccion" required></label>
@@ -155,7 +168,7 @@
                     </select></label>
                 <label>Forma de Envío: <select id="formaEnvio">
                         <option>Retiro en Local</option>
-                        <option>Envío a domicilio</option>
+                        <option>Envío a domicilio - $1300</option>
                     </select></label>
                 <label>Nota: <input type="text" id="nota"></label>
                 <label>Total: <input type="number" id="totalVenta" placeholder="Total" min="0" step="0.01"
@@ -203,36 +216,53 @@
                     <option value="8000">Focaccia Rucula y Jamon Crudo - $8000</option>
                     <option value="8000">Panini Rucula y Jamon crudo - $8000</option>
                     <option value="7000">Calzone Clasico - $7000</option>
-                    <option value="16000">Promo 1 - $16000</option>
-                    <option value="16000">Promo 2 - $16000</option>
-                    <option value="14000">Promo 3 - $14000</option>
+                    <option value="16000"><strong>(PROMOCIÓN) 1 Rucula y Jamon Crudo + 1 Pepperoni - $16000</strong></option>
+                    <option value="16000"><strong>(PROMOCIÓN) 1 Margherita + 1 Focaccia - $14000</strong></option>
+                    <option value="14000"> <strong>(PROMOCIÓN) 2 Margheritas - $14000</strong></option>
                 </select>
                 <input type="number" class="cantidad" placeholder="Cantidad" min="1" value="1" oninput="calcularTotal()">
             `;
             container.appendChild(div);
             calcularTotal();
         }
-    
+
         function calcularTotal() {
             let total = 0;
+
             document.querySelectorAll(".producto-item").forEach(item => {
-                let precio = parseFloat(item.querySelector(".producto").value);
-                let cantidad = parseInt(item.querySelector(".cantidad").value);
+                let precio = parseFloat(item.querySelector(".producto").value) || 0;
+                let cantidad = parseInt(item.querySelector(".cantidad").value) || 1;
                 total += precio * cantidad;
             });
-    
-            // Verificar si la forma de envío es "Retiro en tienda"
-            let formaEnvio = document.getElementById("formaEnvio").value;
-            if (formaEnvio === "Retiro en Local") {
-                total += 1300; // Agregar $1300 al total si se selecciona "Retiro en tienda"
+
+            // Verificar si hay un costo de envío y sumarlo correctamente
+            let formaEnvio = document.getElementById("formaEnvio");
+            if (formaEnvio) {
+                let envioSeleccionado = formaEnvio.options[formaEnvio.selectedIndex].text;
+                if (envioSeleccionado.includes("$")) {
+                    let costoEnvio = parseFloat(envioSeleccionado.replace(/[^\d]/g, '')) || 0;
+                    total += costoEnvio;
+                }
             }
-    
+
             document.getElementById("totalVenta").value = total.toFixed(2);
         }
-    
+
+
+        // Asegurar que el event listener se agregue correctamente
+        document.addEventListener("DOMContentLoaded", function () {
+            let formaEnvio = document.getElementById("formaEnvio");
+            if (formaEnvio) {
+                formaEnvio.addEventListener("change", calcularTotal);
+            }
+        });
+
+
+
+
         // Llamar a calcularTotal cuando la forma de envío cambie
         document.getElementById("formaEnvio").addEventListener("change", calcularTotal);
-    
+
         function agregarVenta() {
             let direccion = document.getElementById("direccion").value;
             let productos = Array.from(document.querySelectorAll(".producto-item"))
@@ -245,7 +275,7 @@
             let formaEnvio = document.getElementById("formaEnvio").value;
             let total = document.getElementById("totalVenta").value;
             let nota = document.getElementById("nota").value;
-    
+
             let venta = {
                 direccion,
                 productos,
@@ -254,14 +284,14 @@
                 total,
                 nota
             };
-    
+
             let ventas = JSON.parse(localStorage.getItem("ventas")) || [];
             ventas.push(venta);
             localStorage.setItem("ventas", JSON.stringify(ventas));
             mostrarVentas();
             document.getElementById("ventaForm").reset();
         }
-    
+
         function mostrarVentas() {
             let ventas = JSON.parse(localStorage.getItem("ventas")) || [];
             let tabla = document.getElementById("ventasTabla");
@@ -280,54 +310,81 @@
                 tabla.appendChild(row);
             });
         }
-    
+
         function eliminarVenta(index) {
             let ventas = JSON.parse(localStorage.getItem("ventas")) || [];
             ventas.splice(index, 1);
             localStorage.setItem("ventas", JSON.stringify(ventas));
             mostrarVentas();
         }
-    
+
         function finalizarDia() {
             localStorage.removeItem("ventas");
             mostrarVentas();
         }
-    
+
         window.onload = mostrarVentas;
-    
+
         function actualizarReloj() {
             const now = new Date();
             const hora = now.getHours().toString().padStart(2, '0');
             const minutos = now.getMinutes().toString().padStart(2, '0');
             const segundos = now.getSeconds().toString().padStart(2, '0');
             const fecha = now.toLocaleDateString();
-    
+
             document.getElementById('reloj').textContent = `${fecha} - ${hora}:${minutos}:${segundos}`;
         }
-    
+
         // Actualiza el reloj cada segundo
         setInterval(actualizarReloj, 1000);
-    
+
         // Inicializa el reloj al cargar la página
         actualizarReloj();
-    
+
         function guardarPDF() {
             // Crea un objeto PDF con la tabla y el reloj
             const doc = new jsPDF();
-            
+
             // Obtener el reloj
             const reloj = document.getElementById('reloj').textContent;
             doc.text('Fecha y Hora: ' + reloj, 10, 10);
-            
+
             // Obtener la tabla
             const tabla = document.getElementById('ventasTabla');
             doc.autoTable({ html: '#ventasTabla', startY: 20 });
-    
+
             // Guardar el PDF con el nombre 'ventas.pdf'
             doc.save('ventas.pdf');
         }
+
+        function finalizarDia() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.text("Ventas Registradas", 20, 10);
+
+            const tabla = document.getElementById("ventasTabla");
+            const filas = tabla.getElementsByTagName("tr");
+
+            let datos = [];
+            for (let i = 0; i < filas.length; i++) {
+                let celdas = filas[i].getElementsByTagName("td");
+                let fila = [];
+                for (let j = 0; j < celdas.length - 1; j++) { // Ignorar la columna de eliminar
+                    fila.push(celdas[j].innerText);
+                }
+                datos.push(fila);
+            }
+
+            doc.autoTable({
+                head: [['Dirección', 'Productos', 'Forma de Pago', 'Forma de Envío', 'Total', 'Nota']],
+                body: datos
+            });
+
+            doc.save("ventas_registradas.pdf");
+        }
     </script>
-    
+
 </body>
 
 </html>
