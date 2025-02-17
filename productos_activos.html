@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estado de Productos</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Título */
+        h1 {
+            font-size: 28px;
+            color: black;
+            margin-bottom: 20px;
+        }
+
+        /* Estilo para la tabla */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        /* Estilo para la celda de la columna Habilitado */
+        td.toggle {
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        /* Estilo para el check verde */
+        td.toggle.checked::before {
+            content: "✔";
+            /* Símbolo de check */
+            color: green;
+        }
+
+        /* Estilo para la cruz roja */
+        td.toggle.unchecked::before {
+            content: "✘";
+            /* Símbolo de cruz */
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h2><a href="dashboard.html">Admin Dashboard</a></h2>
+            <ul>
+                <li><a href="registro_ventas.html">Registro Ventas</a></li>
+                <li><a href="seguimiento_pedidos.html">Panel de Pedidos</a></li>
+                <li><a href="productos_activos.html">True/False Productos</a></li>
+                <li><a href="settings.html">Estado de la App</a></li>
+                <li><a href="productos-disponibles.html">Productos Disponibles</a></li>
+                <li><a href="telefonos-db.html">Puntos Acumulados</a></li>
+                <li><a href="promociones-activas.html">Promociones Activas</a></li>
+                <header class="dashboard-header">
+                    <button class="logout-button" onclick="cerrarSesion()">Salir de la sesión</button>
+                </header>
+            </ul>
+        </aside>
+
+        <div class="main-content-1">
+
+            <h1>Administrar Productos</h1>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Precio</th>
+                        <th>Habilitado</th>
+                    </tr>
+                </thead>
+                <tbody id="productosTabla">
+                    <!-- Aquí se generarán los productos desde Firestore -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCzMNKimcw1kaaJlMdTKj7RAdlsHyaImBk",
+            authDomain: "vera-pizza-app.firebaseapp.com",
+            databaseURL: "https://vera-pizza-app-default-rtdb.firebaseio.com/",
+            projectId: "vera-pizza-app",
+            storageBucket: "vera-pizza-app.appspot.com",
+            messagingSenderId: "783988757356",
+            appId: "1:783988757356:web:c66d3f2571aff0f125d949",
+            measurementId: "G-FNLSPHKXFW"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function cargarProductos() {
+            const productosRef = collection(db, "productos");
+            const snapshot = await getDocs(productosRef);
+            const tabla = document.getElementById("productosTabla");
+            tabla.innerHTML = "";
+
+            snapshot.forEach((docSnap) => {
+                const producto = docSnap.data();
+                const id = docSnap.id;
+
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${producto.nombre}</td>
+                    <td>$${producto.precio}</td>
+                    <td>
+                        <input type="checkbox" ${producto.activo ? "checked" : ""} 
+                            data-id="${id}" class="toggle-checkbox">
+                    </td>
+                `;
+                tabla.appendChild(row);
+            });
+
+            // 🛠 Asignar evento a cada checkbox después de crearlos
+            document.querySelectorAll(".toggle-checkbox").forEach(checkbox => {
+                checkbox.addEventListener("change", async function () {
+                    const productoId = this.getAttribute("data-id");
+                    const estado = this.checked;
+                    console.log(`🟡 Actualizando producto ID: ${productoId} - Nuevo estado: ${estado}`);
+
+                    try {
+                        const productoRef = doc(db, "productos", productoId);
+                        await updateDoc(productoRef, { activo: estado });
+                        console.log(`✅ Producto ${productoId} actualizado correctamente en Firestore`);
+                    } catch (error) {
+                        console.error("❌ Error al actualizar Firestore:", error);
+                        alert("Hubo un error al actualizar el estado en Firestore.");
+                    }
+                });
+            });
+        }
+
+        window.onload = cargarProductos;
+    </script>
+</body>
+
+</html>
