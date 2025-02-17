@@ -77,7 +77,6 @@
                 <thead>
                     <tr>
                         <th>Producto</th>
-                        <th>Precio</th>
                         <th>Habilitado</th>
                     </tr>
                 </thead>
@@ -118,7 +117,6 @@
                 const row = document.createElement("tr");
                 row.innerHTML = `
                     <td>${producto.nombre}</td>
-                    <td>$${producto.precio}</td>
                     <td>
                         <input type="checkbox" ${producto.activo ? "checked" : ""} 
                             data-id="${id}" class="toggle-checkbox">
