@@ -424,6 +424,13 @@
             });
 
             doc.save("ventas_registradas.pdf");
+       // Limpiar las ventas almacenadas en el localStorage
+        localStorage.removeItem("ventas");
+
+        // Limpiar la tabla de ventas en la interfaz de usuario
+        mostrarVentas();
+        alert("El día ha sido finalizado y el resumen se ha descargado.");
+    
         }
     </script>
 
