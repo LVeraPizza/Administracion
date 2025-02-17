@@ -193,213 +193,212 @@
                 <tbody id="ventasTabla"></tbody>
             </table>
         </div>
+
     </div>
 
-  <script>
-    function agregarProducto() {
-        let container = document.getElementById("productosContainer");
-        let div = document.createElement("div");
-        div.classList.add("producto-item");
-        div.innerHTML = `
-            <select class="producto" onchange="calcularTotal()">
-                <option value="8000">Pizza Napolitana Margherita - $8000</option>
-                <option value="10000">Pizza Napolitana 4 Formaggi - $10000</option>
-                <option value="9000">Pizza Napolitana Pepperoni - $9000</option>
-                <option value="9000">Pizza Napolitana Rucula y Jamon Crudo - $9000</option>
-                <option value="9000">Pizza Napolitana Capresse - $9000</option>
-                <option value="9000">Pizza Napolitana Mortadela con Pistacho - $9000</option>
-                <option value="10000">Pizza Romana Capresse - $10000</option>
-                <option value="11000">Pizza Romana 4 Formaggi - $11000</option>
-                <option value="10000">Pizza Romana Pepperoni - $10000</option>
-                <option value="10000">Pizza Romana Rucula y Jamon Crudo - $10000</option>
-                <option value="10000">Pizza Romana Margherita - $10000</option>
-                <option value="8000">Focaccia Mortadela - $8000</option>
-                <option value="8000">Focaccia Rucula y Jamon Crudo - $8000</option>
-                <option value="8000">Panini Rucula y Jamon crudo - $8000</option>
-                <option value="7000">Calzone Clasico - $7000</option>
-                <option value="16000"><strong>(PROMOCIÓN) 1 Rucula y Jamon Crudo + 1 Pepperoni - $16000</strong></option>
-                <option value="14000"><strong>(PROMOCIÓN) 1 Margherita + 1 Focaccia - $14000</strong></option>
-                <option value="14000"> <strong>(PROMOCIÓN) 2 Margheritas - $14000</strong></option>
-            </select>
-            <input type="number" class="cantidad" placeholder="Cantidad" min="1" value="1" oninput="calcularTotal()">
-        `;
-        container.appendChild(div);
-        calcularTotal();
-    }
-
-    function calcularTotal() {
-        let total = 0;
-
-        document.querySelectorAll(".producto-item").forEach(item => {
-            let precio = parseFloat(item.querySelector(".producto").value) || 0;
-            let cantidad = parseInt(item.querySelector(".cantidad").value) || 1;
-            total += precio * cantidad;
-        });
-
-        let formaEnvio = document.getElementById("formaEnvio");
-        if (formaEnvio) {
-            let envioSeleccionado = formaEnvio.options[formaEnvio.selectedIndex].text;
-            if (envioSeleccionado.includes("$")) {
-                let costoEnvio = parseFloat(envioSeleccionado.replace(/[^\d]/g, '')) || 0;
-                total += costoEnvio;
-            }
-        }
-
-        document.getElementById("totalVenta").value = total.toFixed(2);
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
-        let formaEnvio = document.getElementById("formaEnvio");
-        if (formaEnvio) {
-            formaEnvio.addEventListener("change", calcularTotal);
-        }
-    });
-
-    function agregarVenta() {
-        let direccion = document.getElementById("direccion").value;
-        let productos = Array.from(document.querySelectorAll(".producto-item"))
-            .map(item => {
-                let producto = item.querySelector(".producto").selectedOptions[0].text;
-                let cantidad = item.querySelector(".cantidad").value;
-                return `${producto} x${cantidad}`;
-            }).join(", ");
-        let formaPago = document.getElementById("formaPago").value;
-        let formaEnvio = document.getElementById("formaEnvio").value;
-        let total = document.getElementById("totalVenta").value;
-        let nota = document.getElementById("nota").value;
-
-        let venta = {
-            direccion,
-            productos,
-            formaPago,
-            formaEnvio,
-            total,
-            nota
-        };
-
-        let ventas = JSON.parse(localStorage.getItem("ventas")) || [];
-        ventas.push(venta);
-        localStorage.setItem("ventas", JSON.stringify(ventas));
-        mostrarVentas();
-        document.getElementById("ventaForm").reset();
-    }
-
-    function mostrarVentas() {
-        let ventas = JSON.parse(localStorage.getItem("ventas")) || [];
-        let tabla = document.getElementById("ventasTabla");
-        tabla.innerHTML = "";
-        let totalEfectivo = 0;
-        let totalTransferencia = 0;
-        let totalGeneral = 0;
-
-        ventas.forEach((venta, index) => {
-            let row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${venta.direccion}</td>
-                <td>${venta.productos}</td>
-                <td>${venta.formaPago}</td>
-                <td>${venta.formaEnvio}</td>
-                <td>${venta.total}</td>
-                <td>${venta.nota}</td>
-                <td><button class="finalizar-dia-btn" onclick="eliminarVenta(${index})">Eliminar</button></td>
+    <script>
+        function agregarProducto() {
+            let container = document.getElementById("productosContainer");
+            let div = document.createElement("div");
+            div.classList.add("producto-item");
+            div.innerHTML = `
+                <select class="producto" onchange="calcularTotal()">
+                    <option value="8000">Pizza Napolitana Margherita - $8000</option>
+                    <option value="10000">Pizza Napolitana 4 Formaggi - $10000</option>
+                    <option value="9000">Pizza Napolitana Pepperoni - $9000</option>
+                    <option value="9000">Pizza Napolitana Rucula y Jamon Crudo - $9000</option>
+                    <option value="9000">Pizza Napolitana Capresse - $9000</option>
+                    <option value="9000">Pizza Napolitana Mortadela con Pistacho - $9000</option>
+                    <option value="10000">Pizza Romana Capresse - $10000</option>
+                    <option value="11000">Pizza Romana 4 Formaggi - $11000</option>
+                    <option value="10000">Pizza Romana Pepperoni - $10000</option>
+                    <option value="10000">Pizza Romana Rucula y Jamon Crudo - $10000</option>
+                    <option value="10000">Pizza Romana Margherita - $10000</option>
+                    <option value="8000">Focaccia Mortadela - $8000</option>
+                    <option value="8000">Focaccia Rucula y Jamon Crudo - $8000</option>
+                    <option value="8000">Panini Rucula y Jamon crudo - $8000</option>
+                    <option value="7000">Calzone Clasico - $7000</option>
+                    <option value="16000"><strong>(PROMOCIÓN) 1 Rucula y Jamon Crudo + 1 Pepperoni - $16000</strong></option>
+                    <option value="14000"><strong>(PROMOCIÓN) 1 Margherita + 1 Focaccia - $14000</strong></option>
+                    <option value="14000"> <strong>(PROMOCIÓN) 2 Margheritas - $14000</strong></option>
+                </select>
+                <input type="number" class="cantidad" placeholder="Cantidad" min="1" value="1" oninput="calcularTotal()">
             `;
-            tabla.appendChild(row);
-
-            let ventaTotal = parseFloat(venta.total);
-            totalGeneral += ventaTotal;
-            if (venta.formaPago === "Efectivo") {
-                totalEfectivo += ventaTotal;
-            } else if (venta.formaPago === "Transferencia") {
-                totalTransferencia += ventaTotal;
-            }
-        });
-
-        let rowTotal = document.createElement("tr");
-        rowTotal.innerHTML = `
-            <td colspan="4"><strong>Total Efectivo:</strong></td>
-            <td>${totalEfectivo.toFixed(2)}</td>
-            <td colspan="2"></td>
-        `;
-        tabla.appendChild(rowTotal);
-
-        let rowTotalTransferencia = document.createElement("tr");
-        rowTotalTransferencia.innerHTML = `
-            <td colspan="4"><strong>Total Transferencia:</strong></td>
-            <td>${totalTransferencia.toFixed(2)}</td>
-            <td colspan="2"></td>
-        `;
-        tabla.appendChild(rowTotalTransferencia);
-
-        let rowTotalGeneral = document.createElement("tr");
-        rowTotalGeneral.innerHTML = `
-            <td colspan="4"><strong>Total General:</strong></td>
-            <td>${totalGeneral.toFixed(2)}</td>
-            <td colspan="2"></td>
-        `;
-        tabla.appendChild(rowTotalGeneral);
-
-        document.getElementById("totalGeneral").innerHTML = `<strong>Total General:</strong> $${totalGeneral.toFixed(2)}`;
-    }
-
-    function eliminarVenta(index) {
-        let ventas = JSON.parse(localStorage.getItem("ventas")) || [];
-        ventas.splice(index, 1);
-        localStorage.setItem("ventas", JSON.stringify(ventas));
-        mostrarVentas();
-    }
-
-    function finalizarDia() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-
-        doc.text("Ventas Registradas", 20, 10);
-
-        const tabla = document.getElementById("ventasTabla");
-        const filas = tabla.getElementsByTagName("tr");
-
-        let datos = [];
-        for (let i = 0; i < filas.length; i++) {
-            let celdas = filas[i].getElementsByTagName("td");
-            let fila = [];
-            for (let j = 0; j < celdas.length - 1; j++) {
-                fila.push(celdas[j].innerText);
-            }
-            datos.push(fila);
+            container.appendChild(div);
+            calcularTotal();
         }
-
-        doc.autoTable({
-            head: [['Dirección', 'Productos', 'Forma de Pago', 'Forma de Envío', 'Total', 'Nota']],
-            body: datos
+    
+        function calcularTotal() {
+            let total = 0;
+    
+            document.querySelectorAll(".producto-item").forEach(item => {
+                let precio = parseFloat(item.querySelector(".producto").value) || 0;
+                let cantidad = parseInt(item.querySelector(".cantidad").value) || 1;
+                total += precio * cantidad;
+            });
+    
+            let formaEnvio = document.getElementById("formaEnvio");
+            if (formaEnvio) {
+                let envioSeleccionado = formaEnvio.options[formaEnvio.selectedIndex].text;
+                if (envioSeleccionado.includes("$")) {
+                    let costoEnvio = parseFloat(envioSeleccionado.replace(/[^\d]/g, '')) || 0;
+                    total += costoEnvio;
+                }
+            }
+    
+            document.getElementById("totalVenta").value = total.toFixed(2);
+        }
+    
+        document.addEventListener("DOMContentLoaded", function () {
+            let formaEnvio = document.getElementById("formaEnvio");
+            if (formaEnvio) {
+                formaEnvio.addEventListener("change", calcularTotal);
+            }
         });
-
-        doc.save("ventas_registradas.pdf");
-
-        // Limpiar las ventas almacenadas en el localStorage
-        localStorage.removeItem("ventas");
-
-        // Limpiar la tabla de ventas en la interfaz de usuario
-        mostrarVentas();
-
-        // Mostrar la alerta de finalización
-        alert("El día ha sido finalizado y el resumen se ha descargado.");
-    }
-
-    window.onload = mostrarVentas;
-
-    function actualizarReloj() {
-        const now = new Date();
-        const hora = now.getHours().toString().padStart(2, '0');
-        const minutos = now.getMinutes().toString().padStart(2, '0');
-        const segundos = now.getSeconds().toString().padStart(2, '0');
-        const fecha = now.toLocaleDateString();
-
-        document.getElementById('reloj').textContent = `${fecha} - ${hora}:${minutos}:${segundos}`;
-    }
-
-    setInterval(actualizarReloj, 1000);
-    actualizarReloj();
-</script>
-
+    
+        function agregarVenta() {
+            let direccion = document.getElementById("direccion").value;
+            let productos = Array.from(document.querySelectorAll(".producto-item"))
+                .map(item => {
+                    let producto = item.querySelector(".producto").selectedOptions[0].text;
+                    let cantidad = item.querySelector(".cantidad").value;
+                    return `${producto} x${cantidad}`;
+                }).join(", ");
+            let formaPago = document.getElementById("formaPago").value;
+            let formaEnvio = document.getElementById("formaEnvio").value;
+            let total = document.getElementById("totalVenta").value;
+            let nota = document.getElementById("nota").value;
+    
+            let venta = {
+                direccion,
+                productos,
+                formaPago,
+                formaEnvio,
+                total,
+                nota
+            };
+    
+            let ventas = JSON.parse(localStorage.getItem("ventas")) || [];
+            ventas.push(venta);
+            localStorage.setItem("ventas", JSON.stringify(ventas));
+            mostrarVentas();
+    
+            document.getElementById("ventaForm").reset();
+            document.getElementById("productosContainer").innerHTML = '';  // Limpiar productos
+        }
+    
+        function mostrarVentas() {
+            let ventas = JSON.parse(localStorage.getItem("ventas")) || [];
+            let tabla = document.getElementById("ventasTabla");
+            tabla.innerHTML = "";
+            let totalEfectivo = 0;
+            let totalTransferencia = 0;
+            let totalGeneral = 0;
+    
+            ventas.forEach((venta, index) => {
+                let row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${venta.direccion}</td>
+                    <td>${venta.productos}</td>
+                    <td>${venta.formaPago}</td>
+                    <td>${venta.formaEnvio}</td>
+                    <td>${venta.total}</td>
+                    <td>${venta.nota}</td>
+                    <td><button class="finalizar-dia-btn" onclick="eliminarVenta(${index})">Eliminar</button></td>
+                `;
+                tabla.appendChild(row);
+    
+                let ventaTotal = parseFloat(venta.total);
+                totalGeneral += ventaTotal;
+                if (venta.formaPago === "Efectivo") {
+                    totalEfectivo += ventaTotal;
+                } else if (venta.formaPago === "Transferencia") {
+                    totalTransferencia += ventaTotal;
+                }
+            });
+    
+            let rowTotal = document.createElement("tr");
+            rowTotal.innerHTML = `
+                <td colspan="4"><strong>Total Efectivo:</strong></td>
+                <td>${totalEfectivo.toFixed(2)}</td>
+                <td colspan="2"></td>
+            `;
+            tabla.appendChild(rowTotal);
+    
+            let rowTotalTransferencia = document.createElement("tr");
+            rowTotalTransferencia.innerHTML = `
+                <td colspan="4"><strong>Total Transferencia:</strong></td>
+                <td>${totalTransferencia.toFixed(2)}</td>
+                <td colspan="2"></td>
+            `;
+            tabla.appendChild(rowTotalTransferencia);
+    
+            let rowTotalGeneral = document.createElement("tr");
+            rowTotalGeneral.innerHTML = `
+                <td colspan="4"><strong>Total General:</strong></td>
+                <td>${totalGeneral.toFixed(2)}</td>
+                <td colspan="2"></td>
+            `;
+            tabla.appendChild(rowTotalGeneral);
+        }
+    
+        function eliminarVenta(index) {
+            let ventas = JSON.parse(localStorage.getItem("ventas")) || [];
+            ventas.splice(index, 1);
+            localStorage.setItem("ventas", JSON.stringify(ventas));
+            mostrarVentas();
+        }
+    
+        function finalizarDia() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+    
+            doc.text("Ventas Registradas", 20, 10);
+    
+            const tabla = document.getElementById("ventasTabla");
+            const filas = tabla.getElementsByTagName("tr");
+    
+            let datos = [];
+            for (let i = 0; i < filas.length; i++) {
+                let celdas = filas[i].getElementsByTagName("td");
+                let fila = [];
+                for (let j = 0; j < celdas.length - 1; j++) { // Ignorar la columna de eliminar
+                    fila.push(celdas[j].innerText);
+                }
+                datos.push(fila);
+            }
+    
+            doc.autoTable({
+                head: [['Dirección', 'Productos', 'Forma de Pago', 'Forma de Envío', 'Total', 'Nota']],
+                body: datos
+            });
+    
+            doc.save("ventas_registradas.pdf");
+    
+            // Limpiar la tabla y el almacenamiento local
+            localStorage.removeItem("ventas");
+            mostrarVentas();
+    
+            // Mostrar alerta
+            alert("Día finalizado con éxito");
+        }
+    
+        window.onload = mostrarVentas;
+    
+        function actualizarReloj() {
+            const now = new Date();
+            const hora = now.getHours().toString().padStart(2, '0');
+            const minutos = now.getMinutes().toString().padStart(2, '0');
+            const segundos = now.getSeconds().toString().padStart(2, '0');
+            const fecha = now.toLocaleDateString();
+    
+            document.getElementById('reloj').textContent = `${fecha} - ${hora}:${minutos}:${segundos}`;
+        }
+    
+        setInterval(actualizarReloj, 1000);
+        actualizarReloj();
+    </script>
+    
 
 </body>
 
