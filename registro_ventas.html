@@ -422,8 +422,6 @@
                 head: [['Dirección', 'Productos', 'Forma de Pago', 'Forma de Envío', 'Total', 'Nota']],
                 body: datos
             });
-
-            doc.save("ventas_registradas.pdf");
        // Limpiar las ventas almacenadas en el localStorage
         localStorage.removeItem("ventas");
 
@@ -432,6 +430,8 @@
         alert("El día ha sido finalizado y el resumen se ha descargado.");
     
         }
+            doc.save("ventas_registradas.pdf");
+
     </script>
 
 </body>
