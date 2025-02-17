@@ -58,7 +58,7 @@
             .then(html => {
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
-                const productos = doc.querySelectorAll('.product-card', '.product-card-2');
+                const productos = doc.querySelectorAll('.product-card, .product-card-2');
                 const tabla = document.getElementById('productos-tabla');
 
                 productos.forEach(producto => {
