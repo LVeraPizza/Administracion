@@ -293,10 +293,14 @@
             document.getElementById("ventaForm").reset();
         }
 
-        function mostrarVentas() {
+         function mostrarVentas() {
             let ventas = JSON.parse(localStorage.getItem("ventas")) || [];
             let tabla = document.getElementById("ventasTabla");
             tabla.innerHTML = "";
+            let totalEfectivo = 0;
+            let totalTransferencia = 0;
+            let totalGeneral = 0;
+
             ventas.forEach((venta, index) => {
                 let row = document.createElement("tr");
                 row.innerHTML = `
@@ -309,7 +313,44 @@
                     <td><button class="finalizar-dia-btn" onclick="eliminarVenta(${index})">Eliminar</button></td>
                 `;
                 tabla.appendChild(row);
+
+                // Sumar los totales según la forma de pago
+                let ventaTotal = parseFloat(venta.total);
+                totalGeneral += ventaTotal;
+                if (venta.formaPago === "Efectivo") {
+                    totalEfectivo += ventaTotal;
+                } else if (venta.formaPago === "Transferencia") {
+                    totalTransferencia += ventaTotal;
+                }
             });
+
+            // Añadir filas de totales
+            let rowTotal = document.createElement("tr");
+            rowTotal.innerHTML = `
+                <td colspan="4"><strong>Total Efectivo:</strong></td>
+                <td>${totalEfectivo.toFixed(2)}</td>
+                <td colspan="2"></td>
+            `;
+            tabla.appendChild(rowTotal);
+
+            let rowTotalTransferencia = document.createElement("tr");
+            rowTotalTransferencia.innerHTML = `
+                <td colspan="4"><strong>Total Transferencia:</strong></td>
+                <td>${totalTransferencia.toFixed(2)}</td>
+                <td colspan="2"></td>
+            `;
+            tabla.appendChild(rowTotalTransferencia);
+
+            let rowTotalGeneral = document.createElement("tr");
+            rowTotalGeneral.innerHTML = `
+                <td colspan="4"><strong>Total General:</strong></td>
+                <td>${totalGeneral.toFixed(2)}</td>
+                <td colspan="2"></td>
+            `;
+            tabla.appendChild(rowTotalGeneral);
+
+            // Mostrar total general en la sección correspondiente
+            document.getElementById("totalGeneral").innerHTML = `<strong>Total General:</strong> $${totalGeneral.toFixed(2)}`;
         }
 
         function eliminarVenta(index) {
