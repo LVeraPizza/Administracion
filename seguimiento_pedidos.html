@@ -29,6 +29,10 @@
             /* Fondo claro */
             border-radius: 10px;
             padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            /* Sombra suave */
+            overflow-y: auto;
+            /* Scroll si hay muchos pedidos */
             height: auto;
             max-height: 60vh;
             /* Limita la altura máxima */
@@ -90,12 +94,16 @@
         <div class="main-content">
             <h2>Administración de Pedidos</h2>
             <div id="order-list"></div>
+            <button onclick="limpiarPedidos()"
+                style="margin-top: 20px; padding: 10px; background-color: red; color: white; border: none; border-radius: 5px; cursor: pointer;">Limpiar
+                Pedidos</button>
+
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-app.js";
-        import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-database.js";
+        import { getDatabase, ref, get, update, remove } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-database.js";
 
         // Tu configuración de Firebase
         const firebaseConfig = {
@@ -220,6 +228,21 @@
 
         // Llamada al cambiar el estado del pedido
         cambiarEstadoPedido('en preparación');
+
+
+        window.limpiarPedidos = function () {
+            if (confirm("¿Estás seguro de que quieres eliminar todos los pedidos?")) {
+                const pedidosRef = ref(database, 'pedidos');
+                remove(pedidosRef).then(() => {
+                    alert("Todos los pedidos han sido eliminados.");
+                    displayOrders(); // Actualizar la lista de pedidos
+                }).catch((error) => {
+                    console.error("Error al eliminar los pedidos:", error);
+                });
+            }
+        };
+
+
 
     </script>
     <script>
